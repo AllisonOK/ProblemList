@@ -1,0 +1,87 @@
+##Android Kotlin项目集成阿里ARouter
+
+####第一步，集成kotlin插件
+
+```
+    apply plugin: 'kotlin-kapt'
+```
+
+####第二步，添加依赖
+
+```
+dependencies {
+          implementation 'com.alibaba:arouter-api:1.5.0'
+      kapt 'com.alibaba:arouter-compiler:1.2.2'
+    }
+
+defaultConfig {
+
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.getName())
+        }
+    }
+}
+```
+
+####第四步，初始化SDK
+
+```
+ ARouter.init(mApplication); // 尽可能早，推荐在Application中初始化
+```
+
+####添加混淆规则(如果使用了Proguard)
+
+```
+ -keep public class com.alibaba.android.arouter.routes.**{*;}
+```
+
+####使用方法
+
+```
+添加注解
+@Route(path = "/haifengdemo/login")
+class LoginActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_login)
+    }
+}
+
+Activity跳转
+1. 应用内简单的跳转
+ARouter.getInstance().build("/haifengdemo/login").navigation()
+2. 跳转并携带参数
+ ARouter.getInstance().build("/test/1")
+             .withLong("key1", 666L)
+             .withString("key3", "888")
+             .navigation();
+
+Fragment的使用方法
+定义Fragment
+@Route(path = "/haifengdemo/test_fragment")
+class TestFragment :Fragment(){
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        val  test: Int? = arguments?.getInt("xxxx")
+        val  test2:String? = arguments?.getString("xxx")
+        return  layoutInflater.inflate(R.layout.fragment_test,null)
+    }
+}
+
+Fragment跳转
+val  fragment:Fragment= ARouter.getInstance()
+        .build("/haifengdemo/test_fragment") 
+        .navigation() as Fragment
+val  bundle =Bundle()
+bundle.putInt("test",123)
+fragment.arguments=bundle
+supportFragmentManager.beginTransaction()
+    .replace(R.id.content,fragment).commitAllowingStateLoss()
+
+```
+
+####参考文档
+[https://www.jianshu.com/p/7cb2cc9b726a](https://www.jianshu.com/p/7cb2cc9b726a)
